@@ -9,21 +9,23 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/balabeir/assessment/db"
 	"github.com/balabeir/assessment/handler"
 	"github.com/labstack/echo"
 )
 
 func main() {
-	h := handler.New()
+	db.Initial()
+	e := handler.New()
 
 	// start server
 	go func() {
-		if err := h.Start(":" + os.Getenv("PORT")); err != nil && err != http.ErrServerClosed {
-			h.Logger.Fatal("shutting down the server")
+		if err := e.Start(os.Getenv("PORT")); err != nil && err != http.ErrServerClosed {
+			e.Logger.Fatal("shutting down the server")
 		}
 	}()
 
-	shutdown(h)
+	shutdown(e)
 }
 
 func shutdown(h *echo.Echo) {
