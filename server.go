@@ -9,13 +9,13 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/balabeir/assessment/db"
+	"github.com/balabeir/assessment/database"
 	"github.com/balabeir/assessment/handler"
 	"github.com/labstack/echo"
 )
 
 func main() {
-	db.Initial()
+	database.Initial()
 	e := handler.New()
 
 	// start server

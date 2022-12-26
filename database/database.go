@@ -1,4 +1,4 @@
-package db
+package database
 
 import (
 	"database/sql"
@@ -8,9 +8,7 @@ import (
 	_ "github.com/lib/pq"
 )
 
-var DB *sql.DB
-
-func Initial() {
+func Initial() *sql.DB {
 	db, err := sql.Open("postgres", os.Getenv("DATABASE_URL"))
 	if err != nil {
 		log.Fatal("Connect database failed:", err)
@@ -27,4 +25,6 @@ func Initial() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	return db
 }
