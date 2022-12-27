@@ -23,3 +23,13 @@ func (e *Expense) Create(db *sql.DB) error {
 	)
 	return row.Scan(&e.ID)
 }
+
+func (e *Expense) Get(db *sql.DB) error {
+	stm, err := db.Prepare("SELECT id, title, amount, note, tags FROM expenses WHERE id = $1")
+	if err != nil {
+		return err
+	}
+	row := stm.QueryRow(e.ID)
+
+	return row.Scan(&e.ID, &e.Title, &e.Amount, &e.Note, pq.Array(&e.Tags))
+}

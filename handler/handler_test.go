@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"database/sql"
 	"encoding/json"
-	"log"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -16,12 +15,14 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestCreateExpenseHandler(t *testing.T) {
-	db, err := sql.Open("postgres", os.Getenv("DATABASE_URL"))
-	if err != nil {
-		log.Fatal("Connect database failed:", err)
-	}
+func setup(t *testing.T) *sql.DB {
+	db, _ := sql.Open("postgres", os.Getenv("DATABASE_URL"))
+	return db
+}
 
+func TestCreateExpenseHandler(t *testing.T) {
+	db := setup(t)
+	defer db.Close()
 	handler := NewServer(db)
 	srv := httptest.NewServer(handler)
 
@@ -35,7 +36,7 @@ func TestCreateExpenseHandler(t *testing.T) {
 	if err != nil {
 		panic(err)
 	}
-	resp, _ := http.Post(srv.URL+"/expense", echo.MIMEApplicationJSON, bytes.NewBuffer(reqBody))
+	resp, _ := http.Post(srv.URL+"/expense/", echo.MIMEApplicationJSON, bytes.NewBuffer(reqBody))
 
 	var got store.Expense
 	json.NewDecoder(resp.Body).Decode(&got)
@@ -47,4 +48,20 @@ func TestCreateExpenseHandler(t *testing.T) {
 	assert.Equal(want.Amount, got.Amount)
 	assert.Equal(want.Note, got.Note)
 	assert.Equal(want.Tags, got.Tags)
+}
+
+func TestGetExpenseHandler(t *testing.T) {
+	db := setup(t)
+	defer db.Close()
+	handler := NewServer(db)
+	srv := httptest.NewServer(handler)
+
+	resp, _ := http.Get(srv.URL + "/expense/1")
+
+	var got store.Expense
+	json.NewDecoder(resp.Body).Decode(&got)
+
+	assert := assert.New(t)
+	assert.Equal(http.StatusOK, resp.StatusCode)
+	assert.Equal(1, got.ID)
 }

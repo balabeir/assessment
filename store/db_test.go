@@ -39,3 +39,16 @@ func TestCreateExpense(t *testing.T) {
 	assert.Equal(expect.Note, got.Note)
 	assert.Equal(len(expect.Tags), len(got.Tags))
 }
+
+func TestGetExpense(t *testing.T) {
+	db := setup(t)
+	defer db.Close()
+
+	expense := Expense{ID: 1}
+	err := expense.Get(db)
+
+	assert := assert.New(t)
+	assert.Nil(err)
+	assert.NotEqual(sql.ErrNoRows, err)
+	assert.NotEqual(0, expense.ID)
+}
