@@ -1,11 +1,12 @@
-package database
+package handler
 
 import (
 	"database/sql"
+	"log"
 	"net/http"
 
+	"github.com/balabeir/assessment/database"
 	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
 )
 
 type Handler struct {
@@ -20,16 +21,13 @@ func NewHandler(db *sql.DB) *Handler {
 func NewServer(db *sql.DB) *Handler {
 	handler := NewHandler(db)
 
-	handler.Use(middleware.Logger())
-	handler.Use(middleware.Recover())
-
 	handler.POST("/expense", handler.createExpenseHandler)
 
 	return handler
 }
 
 func (h *Handler) createExpenseHandler(c echo.Context) error {
-	expense := Expense{}
+	expense := database.Expense{}
 	err := c.Bind(&expense)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{
@@ -39,8 +37,9 @@ func (h *Handler) createExpenseHandler(c echo.Context) error {
 
 	err = expense.Create(h.db)
 	if err != nil {
+		log.Println(err)
 		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
-			"message": "internal server error",
+			"message": err.Error(),
 		})
 	}
 

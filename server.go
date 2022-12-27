@@ -12,18 +12,21 @@ import (
 	"time"
 
 	"github.com/balabeir/assessment/database"
+	"github.com/balabeir/assessment/handler"
+	"github.com/labstack/echo/v4/middleware"
 	_ "github.com/lib/pq"
 )
 
 func main() {
-	conn, err := sql.Open("postgres", os.Getenv("DATABASE_URL"))
+	db, err := sql.Open("postgres", os.Getenv("DATABASE_URL"))
 	if err != nil {
 		log.Fatal("Connect database failed:", err)
 	}
-	db := database.NewDB(conn)
 	database.InitialDB(db)
 
-	handler := database.NewServer(db.DB)
+	handler := handler.NewServer(db)
+	handler.Use(middleware.Logger())
+	handler.Use(middleware.Recover())
 
 	// start server
 	go func() {
@@ -35,7 +38,7 @@ func main() {
 	shutdown(handler)
 }
 
-func shutdown(h *database.Handler) {
+func shutdown(h *handler.Handler) {
 	shutdown := make(chan os.Signal, 1)
 	signal.Notify(shutdown, os.Interrupt, syscall.SIGTERM)
 	<-shutdown

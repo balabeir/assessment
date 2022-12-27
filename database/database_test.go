@@ -2,7 +2,6 @@ package database
 
 import (
 	"database/sql"
-	"log"
 	"os"
 	"testing"
 
@@ -10,17 +9,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func setupDB() *sql.DB {
-	db, err := sql.Open("postgres", os.Getenv("DATABASE_URL"))
-	if err != nil {
-		log.Fatal("Connect database failed:", err)
-	}
-
-	return db
-}
-
 func TestCreateExpense(t *testing.T) {
-	db := setupDB()
+	db, _ := sql.Open("postgres", os.Getenv("DATABASE_URL"))
 
 	expect := Expense{
 		Title:  "john",

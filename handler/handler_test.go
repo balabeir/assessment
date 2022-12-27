@@ -1,4 +1,4 @@
-package database
+package handler
 
 import (
 	"bytes"
@@ -10,6 +10,7 @@ import (
 	"os"
 	"testing"
 
+	"github.com/balabeir/assessment/database"
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
 )
@@ -23,7 +24,7 @@ func TestCreateExpenseHandler(t *testing.T) {
 	handler := NewServer(db)
 	srv := httptest.NewServer(handler)
 
-	want := Expense{
+	want := database.Expense{
 		Title:  "Bob",
 		Amount: 20,
 		Note:   "testing",
@@ -35,7 +36,7 @@ func TestCreateExpenseHandler(t *testing.T) {
 	}
 	resp, _ := http.Post(srv.URL+"/expense", echo.MIMEApplicationJSON, bytes.NewBuffer(reqBody))
 
-	var got Expense
+	var got database.Expense
 	json.NewDecoder(resp.Body).Decode(&got)
 
 	assert := assert.New(t)
