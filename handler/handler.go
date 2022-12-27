@@ -5,8 +5,9 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/balabeir/assessment/database"
+	"github.com/balabeir/assessment/store"
 	"github.com/labstack/echo/v4"
+	_ "github.com/lib/pq"
 )
 
 type Handler struct {
@@ -27,7 +28,7 @@ func NewServer(db *sql.DB) *Handler {
 }
 
 func (h *Handler) createExpenseHandler(c echo.Context) error {
-	expense := database.Expense{}
+	expense := store.Expense{}
 	err := c.Bind(&expense)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{

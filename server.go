@@ -11,20 +11,20 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/balabeir/assessment/database"
 	"github.com/balabeir/assessment/handler"
+	"github.com/balabeir/assessment/store"
 	"github.com/labstack/echo/v4/middleware"
 	_ "github.com/lib/pq"
 )
 
 func main() {
-	db, err := sql.Open("postgres", os.Getenv("DATABASE_URL"))
+	conn, err := sql.Open("postgres", os.Getenv("DATABASE_URL"))
 	if err != nil {
 		log.Fatal("Connect database failed:", err)
 	}
-	database.InitialDB(db)
 
-	handler := handler.NewServer(db)
+	store.InitialDB(conn)
+	handler := handler.NewServer(conn)
 	handler.Use(middleware.Logger())
 	handler.Use(middleware.Recover())
 

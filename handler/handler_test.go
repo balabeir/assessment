@@ -10,8 +10,9 @@ import (
 	"os"
 	"testing"
 
-	"github.com/balabeir/assessment/database"
+	"github.com/balabeir/assessment/store"
 	"github.com/labstack/echo/v4"
+	_ "github.com/lib/pq"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -24,7 +25,7 @@ func TestCreateExpenseHandler(t *testing.T) {
 	handler := NewServer(db)
 	srv := httptest.NewServer(handler)
 
-	want := database.Expense{
+	want := store.Expense{
 		Title:  "Bob",
 		Amount: 20,
 		Note:   "testing",
@@ -36,7 +37,7 @@ func TestCreateExpenseHandler(t *testing.T) {
 	}
 	resp, _ := http.Post(srv.URL+"/expense", echo.MIMEApplicationJSON, bytes.NewBuffer(reqBody))
 
-	var got database.Expense
+	var got store.Expense
 	json.NewDecoder(resp.Body).Decode(&got)
 
 	assert := assert.New(t)

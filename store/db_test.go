@@ -1,4 +1,4 @@
-package database
+package store
 
 import (
 	"database/sql"
@@ -9,8 +9,15 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestCreateExpense(t *testing.T) {
+func setup(t *testing.T) *sql.DB {
 	db, _ := sql.Open("postgres", os.Getenv("DATABASE_URL"))
+	return db
+}
+
+func TestCreateExpense(t *testing.T) {
+	conn := setup(t)
+	defer conn.Close()
+	store := New(conn)
 
 	expect := Expense{
 		Title:  "john",
@@ -18,10 +25,10 @@ func TestCreateExpense(t *testing.T) {
 		Note:   "test",
 		Tags:   []string{"foo", "bar"},
 	}
-	expect.Create(db)
+	expect.Insert(store)
 
 	got := Expense{}
-	stm, _ := db.Prepare("SELECT * FROM expenses WHERE id = $1")
+	stm, _ := conn.Prepare("SELECT * FROM expenses WHERE id = $1")
 	err := stm.QueryRow(expect.ID).Scan(&got.ID, &got.Title, &got.Amount, &got.Note, pq.Array(&got.Tags))
 
 	assert := assert.New(t)
