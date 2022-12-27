@@ -11,7 +11,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/balabeir/assessment/pkg/database"
+	"github.com/balabeir/assessment/database"
 	"github.com/labstack/echo/v4"
 )
 
