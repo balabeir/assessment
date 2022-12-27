@@ -2,23 +2,30 @@ package database
 
 import (
 	"bytes"
+	"database/sql"
 	"encoding/json"
+	"log"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"testing"
 
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
 )
 
-func TestHandler(t *testing.T) {
-	InitialDB()
-	e := NewHandler()
-	srv := httptest.NewServer(e)
+func TestCreateExpenseHandler(t *testing.T) {
+	db, err := sql.Open("postgres", os.Getenv("DATABASE_URL"))
+	if err != nil {
+		log.Fatal("Connect database failed:", err)
+	}
+
+	handler := NewHandler(db)
+	srv := httptest.NewServer(handler.E)
 
 	want := Expense{
 		Title:  "Bob",
-		Amount: 10,
+		Amount: 20,
 		Note:   "testing",
 		Tags:   []string{"foo", "bar"},
 	}

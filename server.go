@@ -2,7 +2,9 @@ package main
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"os/signal"
@@ -14,17 +16,21 @@ import (
 )
 
 func main() {
-	database.InitialDB()
-	e := database.NewHandler()
+	db, err := sql.Open("postgres", os.Getenv("DATABASE_URL"))
+	if err != nil {
+		log.Fatal("Connect database failed:", err)
+	}
+	database.InitialDB(db)
+	handler := database.NewHandler(db)
 
 	// start server
 	go func() {
-		if err := e.Start(os.Getenv("PORT")); err != nil && err != http.ErrServerClosed {
-			e.Logger.Fatal("shutting down the server")
+		if err := handler.E.Start(os.Getenv("PORT")); err != nil && err != http.ErrServerClosed {
+			handler.E.Logger.Fatal("shutting down the server")
 		}
 	}()
 
-	shutdown(e)
+	shutdown(handler.E)
 }
 
 func shutdown(h *echo.Echo) {
