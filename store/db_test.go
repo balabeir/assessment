@@ -15,9 +15,8 @@ func setup(t *testing.T) *sql.DB {
 }
 
 func TestCreateExpense(t *testing.T) {
-	conn := setup(t)
-	defer conn.Close()
-	store := New(conn)
+	db := setup(t)
+	defer db.Close()
 
 	expect := Expense{
 		Title:  "john",
@@ -25,10 +24,10 @@ func TestCreateExpense(t *testing.T) {
 		Note:   "test",
 		Tags:   []string{"foo", "bar"},
 	}
-	expect.Insert(store)
+	expect.Create(db)
 
 	got := Expense{}
-	stm, _ := conn.Prepare("SELECT * FROM expenses WHERE id = $1")
+	stm, _ := db.Prepare("SELECT * FROM expenses WHERE id = $1")
 	err := stm.QueryRow(expect.ID).Scan(&got.ID, &got.Title, &got.Amount, &got.Note, pq.Array(&got.Tags))
 
 	assert := assert.New(t)

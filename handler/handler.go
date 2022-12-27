@@ -11,20 +11,19 @@ import (
 )
 
 type Handler struct {
-	*echo.Echo
 	db *sql.DB
 }
 
-func NewHandler(db *sql.DB) *Handler {
-	return &Handler{echo.New(), db}
+func New(db *sql.DB) *Handler {
+	return &Handler{db: db}
 }
 
-func NewServer(db *sql.DB) *Handler {
-	handler := NewHandler(db)
+func NewServer(db *sql.DB) *echo.Echo {
+	handler := New(db)
+	e := echo.New()
+	e.POST("/expense", handler.createExpenseHandler)
 
-	handler.POST("/expense", handler.createExpenseHandler)
-
-	return handler
+	return e
 }
 
 func (h *Handler) createExpenseHandler(c echo.Context) error {

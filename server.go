@@ -13,6 +13,7 @@ import (
 
 	"github.com/balabeir/assessment/handler"
 	"github.com/balabeir/assessment/store"
+	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	_ "github.com/lib/pq"
 )
@@ -23,29 +24,29 @@ func main() {
 		log.Fatal("Connect database failed:", err)
 	}
 
-	store.InitialDB(conn)
-	handler := handler.NewServer(conn)
-	handler.Use(middleware.Logger())
-	handler.Use(middleware.Recover())
+	store.Initial(conn)
+	e := handler.NewServer(conn)
+	e.Use(middleware.Logger())
+	e.Use(middleware.Recover())
 
 	// start server
 	go func() {
-		if err := handler.Start(os.Getenv("PORT")); err != nil && err != http.ErrServerClosed {
-			handler.Logger.Fatal("shutting down the server")
+		if err := e.Start(os.Getenv("PORT")); err != nil && err != http.ErrServerClosed {
+			e.Logger.Fatal("shutting down the server")
 		}
 	}()
 
-	shutdown(handler)
+	shutdown(e)
 }
 
-func shutdown(h *handler.Handler) {
+func shutdown(e *echo.Echo) {
 	shutdown := make(chan os.Signal, 1)
 	signal.Notify(shutdown, os.Interrupt, syscall.SIGTERM)
 	<-shutdown
 	fmt.Println("server shutting down...")
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
-	if err := h.Shutdown(ctx); err != nil {
-		h.Logger.Fatal(err)
+	if err := e.Shutdown(ctx); err != nil {
+		e.Logger.Fatal(err)
 	}
 }
