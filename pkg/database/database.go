@@ -8,7 +8,9 @@ import (
 	_ "github.com/lib/pq"
 )
 
-func Initial() *sql.DB {
+var DB *sql.DB
+
+func InitialDB() {
 	db, err := sql.Open("postgres", os.Getenv("DATABASE_URL"))
 	if err != nil {
 		log.Fatal("Connect database failed:", err)
@@ -26,5 +28,5 @@ func Initial() *sql.DB {
 		log.Fatal(err)
 	}
 
-	return db
+	DB = db
 }
