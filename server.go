@@ -12,28 +12,30 @@ import (
 	"time"
 
 	"github.com/balabeir/assessment/database"
-	"github.com/labstack/echo/v4"
+	_ "github.com/lib/pq"
 )
 
 func main() {
-	db, err := sql.Open("postgres", os.Getenv("DATABASE_URL"))
+	conn, err := sql.Open("postgres", os.Getenv("DATABASE_URL"))
 	if err != nil {
 		log.Fatal("Connect database failed:", err)
 	}
+	db := database.NewDB(conn)
 	database.InitialDB(db)
-	handler := database.NewHandler(db)
+
+	handler := database.NewServer(db.DB)
 
 	// start server
 	go func() {
-		if err := handler.E.Start(os.Getenv("PORT")); err != nil && err != http.ErrServerClosed {
-			handler.E.Logger.Fatal("shutting down the server")
+		if err := handler.Start(os.Getenv("PORT")); err != nil && err != http.ErrServerClosed {
+			handler.Logger.Fatal("shutting down the server")
 		}
 	}()
 
-	shutdown(handler.E)
+	shutdown(handler)
 }
 
-func shutdown(h *echo.Echo) {
+func shutdown(h *database.Handler) {
 	shutdown := make(chan os.Signal, 1)
 	signal.Notify(shutdown, os.Interrupt, syscall.SIGTERM)
 	<-shutdown

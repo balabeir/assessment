@@ -9,21 +9,21 @@ import (
 )
 
 type Handler struct {
-	E  *echo.Echo
+	*echo.Echo
 	db *sql.DB
 }
 
 func NewHandler(db *sql.DB) *Handler {
-	e := echo.New()
-	handler := &Handler{
-		E:  e,
-		db: db,
-	}
+	return &Handler{echo.New(), db}
+}
 
-	handler.E.Use(middleware.Logger())
-	handler.E.Use(middleware.Recover())
+func NewServer(db *sql.DB) *Handler {
+	handler := NewHandler(db)
 
-	handler.E.POST("/expense", handler.createExpenseHandler)
+	handler.Use(middleware.Logger())
+	handler.Use(middleware.Recover())
+
+	handler.POST("/expense", handler.createExpenseHandler)
 
 	return handler
 }
@@ -37,7 +37,7 @@ func (h *Handler) createExpenseHandler(c echo.Context) error {
 		})
 	}
 
-	err = expense.CreateExpense(h.db)
+	err = expense.Create(h.db)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
 			"message": "internal server error",

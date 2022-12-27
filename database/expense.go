@@ -14,7 +14,7 @@ type Expense struct {
 	Tags   []string `json:"tags"`
 }
 
-func (e *Expense) CreateExpense(db *sql.DB) error {
+func (e *Expense) Create(db *sql.DB) error {
 	row := db.QueryRow(
 		`INSERT INTO expenses (title, amount, note, tags) 
 		VALUES ($1, $2, $3, $4) 

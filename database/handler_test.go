@@ -20,8 +20,8 @@ func TestCreateExpenseHandler(t *testing.T) {
 		log.Fatal("Connect database failed:", err)
 	}
 
-	handler := NewHandler(db)
-	srv := httptest.NewServer(handler.E)
+	handler := NewServer(db)
+	srv := httptest.NewServer(handler)
 
 	want := Expense{
 		Title:  "Bob",
