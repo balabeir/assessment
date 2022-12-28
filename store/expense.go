@@ -15,13 +15,16 @@ type Expense struct {
 }
 
 func (e *Expense) Create(db *sql.DB) error {
-	row := db.QueryRow(
-		`INSERT INTO expenses (title, amount, note, tags)
-		VALUES ($1, $2, $3, $4)
-		RETURNING id`,
-		e.Title, e.Amount, e.Note, pq.Array(e.Tags),
-	)
-	return row.Scan(&e.ID)
+	result, err := db.Exec(`
+		INSERT INTO expenses (title, amount, note, tags)
+		VALUES ($1, $2, $3, $4)`, e.Title, e.Amount, e.Note, pq.Array(e.Tags))
+	if err != nil {
+		return err
+	}
+
+	id, err := result.LastInsertId()
+	e.ID = int(id)
+	return err
 }
 
 func (e *Expense) Get(db *sql.DB) error {

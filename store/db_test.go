@@ -2,46 +2,44 @@ package store
 
 import (
 	"database/sql"
-	"os"
+	"regexp"
 	"testing"
 
+	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/lib/pq"
 	"github.com/stretchr/testify/assert"
 )
 
-func setup(t *testing.T) *sql.DB {
-	db, _ := sql.Open("postgres", os.Getenv("DATABASE_URL"))
-	return db
+func setup(t *testing.T) (*sql.DB, sqlmock.Sqlmock) {
+	db, mock, err := sqlmock.New()
+	if err != nil {
+		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
+	}
+	return db, mock
 }
 
 func TestCreateExpense(t *testing.T) {
-	db := setup(t)
+	db, mock := setup(t)
 	defer db.Close()
 
-	expect := Expense{
+	expense := Expense{
 		Title:  "john",
 		Amount: 20,
 		Note:   "test",
 		Tags:   []string{"foo", "bar"},
 	}
-	expect.Create(db)
 
-	got := Expense{}
-	stm, _ := db.Prepare("SELECT * FROM expenses WHERE id = $1")
-	err := stm.QueryRow(expect.ID).Scan(&got.ID, &got.Title, &got.Amount, &got.Note, pq.Array(&got.Tags))
+	mock.ExpectExec(regexp.QuoteMeta(`
+			INSERT INTO expenses`)).
+		WithArgs(expense.Title, expense.Amount, expense.Note, pq.Array(expense.Tags)).
+		WillReturnResult(sqlmock.NewResult(1, 1))
 
-	assert := assert.New(t)
-	assert.NotEqual(sql.ErrNoRows, err)
-	assert.Nil(err)
-	assert.Equal(expect.ID, got.ID)
-	assert.Equal(expect.Title, got.Title)
-	assert.Equal(expect.Amount, got.Amount)
-	assert.Equal(expect.Note, got.Note)
-	assert.Equal(len(expect.Tags), len(got.Tags))
+	err := expense.Create(db)
+	assert.Nil(t, err)
 }
 
 func TestGetExpense(t *testing.T) {
-	db := setup(t)
+	db, _ := setup(t)
 	defer db.Close()
 
 	expense := Expense{ID: 1}
