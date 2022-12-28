@@ -29,8 +29,7 @@ func TestCreateExpense(t *testing.T) {
 		Tags:   []string{"foo", "bar"},
 	}
 
-	mock.ExpectExec(regexp.QuoteMeta(`
-			INSERT INTO expenses`)).
+	mock.ExpectExec(regexp.QuoteMeta(`INSERT INTO expenses`)).
 		WithArgs(expense.Title, expense.Amount, expense.Note, pq.Array(expense.Tags)).
 		WillReturnResult(sqlmock.NewResult(1, 1))
 
@@ -39,14 +38,19 @@ func TestCreateExpense(t *testing.T) {
 }
 
 func TestGetExpense(t *testing.T) {
-	db, _ := setup(t)
+	db, mock := setup(t)
 	defer db.Close()
+
+	mockRows := sqlmock.NewRows([]string{"id", "title", "amount", "note", "tags"}).
+		AddRow(1, "one", 10, "test1", pq.Array([]string{"foo", "bar"}))
+
+	mock.ExpectPrepare("SELECT id, title, amount, note, tags FROM expenses").
+		ExpectQuery().
+		WithArgs(1).
+		WillReturnRows(mockRows)
 
 	expense := Expense{ID: 1}
 	err := expense.Get(db)
 
-	assert := assert.New(t)
-	assert.Nil(err)
-	assert.NotEqual(sql.ErrNoRows, err)
-	assert.NotEqual(0, expense.ID)
+	assert.Nil(t, err)
 }
