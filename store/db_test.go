@@ -2,7 +2,6 @@ package store
 
 import (
 	"database/sql"
-	"regexp"
 	"testing"
 
 	"github.com/DATA-DOG/go-sqlmock"
@@ -29,12 +28,12 @@ func TestCreateExpense(t *testing.T) {
 		Tags:   []string{"foo", "bar"},
 	}
 
-	mock.ExpectExec(regexp.QuoteMeta(`INSERT INTO expenses`)).
+	mock.ExpectExec("INSERT INTO expenses").
 		WithArgs(expense.Title, expense.Amount, expense.Note, pq.Array(expense.Tags)).
 		WillReturnResult(sqlmock.NewResult(1, 1))
 
 	err := expense.Create(db)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 }
 
 func TestGetExpense(t *testing.T) {
@@ -52,5 +51,5 @@ func TestGetExpense(t *testing.T) {
 	expense := Expense{ID: 1}
 	err := expense.Get(db)
 
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 }
