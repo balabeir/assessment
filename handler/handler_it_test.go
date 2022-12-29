@@ -48,41 +48,4 @@ func TestITCreateExpense(t *testing.T) {
 		assert.Equal(t, expense.Note, got.Note)
 		assert.Equal(t, expense.Tags, got.Tags)
 	}
-
-	// e := echo.New()
-	// req := httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(reqBody))
-	// req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-	// rec := httptest.NewRecorder()
-	// c := e.NewContext(req, rec)
-	// h := New(db)
-
-	// expected, _ := json.Marshal(expense)
-
-	// Assertions
-	// if assert.NoError(t, h.createExpenseHandler(c)) {
-	// assert.Equal(t, http.StatusCreated, rec.Code)
-	// assert.Equal(t, string(expected), rec.Body.String())
-	// }
-	// eh := echo.New()
-	// go func(e *echo.Echo) {
-	// 	db, err := sql.Open("postgres", "postgresql://root:root@db/go-example-db?sslmode=disable")
-	// 	if err != nil {
-	// 		log.Fatal(err)
-	// 	}
-
-	// 	handler := New(db)
-	// 	e.GET("/expense/:id", handler.getExpenseHandler)
-
-	// 	e.Start(fmt.Sprintf(":%d", serverPort))
-	// }(eh)
-	// for {
-	// 	conn, err := net.DialTimeout("tcp", fmt.Sprintf("localhost:%d", serverPort), 30*time.Second)
-	// 	if err != nil {
-	// 		log.Println(err)
-	// 	}
-	// 	if conn != nil {
-	// 		conn.Close()
-	// 		break
-	// 	}
-	// }
 }
