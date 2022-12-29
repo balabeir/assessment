@@ -29,6 +29,7 @@ func setupDB(t *testing.T) (*sql.DB, sqlmock.Sqlmock) {
 
 func TestCreateExpenseHandler(t *testing.T) {
 	expense := store.Expense{
+		ID:     1,
 		Title:  "Bob",
 		Amount: 20,
 		Note:   "testing",
@@ -46,13 +47,11 @@ func TestCreateExpenseHandler(t *testing.T) {
 	defer db.Close()
 	handler := New(db)
 
-	mock.ExpectExec("INSERT INTO expenses").
+	mock.ExpectQuery("INSERT INTO expenses").
 		WithArgs(expense.Title, expense.Amount, expense.Note, pq.Array(expense.Tags)).
-		WillReturnResult(sqlmock.NewResult(1, 1))
+		WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(1))
 
-	ex := expense
-	ex.ID = 1
-	expected, _ := json.Marshal(ex)
+	expected, _ := json.Marshal(expense)
 
 	err := handler.createExpenseHandler(c)
 

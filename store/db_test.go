@@ -31,9 +31,9 @@ func TestCreateExpense(t *testing.T) {
 		Tags:   []string{"foo", "bar"},
 	}
 
-	mock.ExpectExec("INSERT INTO expenses").
+	mock.ExpectQuery("INSERT INTO expenses").
 		WithArgs(expense.Title, expense.Amount, expense.Note, pq.Array(expense.Tags)).
-		WillReturnResult(sqlmock.NewResult(1, 1))
+		WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(1))
 
 	err := expense.Create(db)
 	assert.NoError(t, err)

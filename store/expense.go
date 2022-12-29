@@ -4,6 +4,7 @@ import (
 	"database/sql"
 
 	"github.com/lib/pq"
+	_ "github.com/lib/pq"
 )
 
 type Expense struct {
@@ -15,15 +16,11 @@ type Expense struct {
 }
 
 func (e *Expense) Create(db *sql.DB) error {
-	result, err := db.Exec(`
+	row := db.QueryRow(`
 		INSERT INTO expenses (title, amount, note, tags)
-		VALUES ($1, $2, $3, $4)`, e.Title, e.Amount, e.Note, pq.Array(e.Tags))
-	if err != nil {
-		return err
-	}
-
-	id, err := result.LastInsertId()
-	e.ID = int(id)
+		VALUES ($1, $2, $3, $4) RETURNING id`,
+		e.Title, e.Amount, e.Note, pq.Array(e.Tags))
+	err := row.Scan(&e.ID)
 	return err
 }
 
