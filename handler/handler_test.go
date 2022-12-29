@@ -1,3 +1,6 @@
+//go:build unit
+// +build unit
+
 package handler
 
 import (
@@ -13,7 +16,6 @@ import (
 	"github.com/balabeir/assessment/store"
 	"github.com/labstack/echo/v4"
 	"github.com/lib/pq"
-	_ "github.com/lib/pq"
 	"github.com/stretchr/testify/assert"
 )
 
