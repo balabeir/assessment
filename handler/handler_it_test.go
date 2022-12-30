@@ -17,10 +17,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-const serverPort = 80
-
 func TestITCreateExpense(t *testing.T) {
-	db, _ := sql.Open("postgres", "postgres://xdkhrnfq:ri_5P5A5v_Z-uGAoeyaLset9oWhN24xv@babar.db.elephantsql.com/xdkhrnfq")
+	db, _ := sql.Open("postgres", "postgresql://test:test@db/it-db?sslmode=disable")
 
 	expense := store.Expense{
 		ID:     1,
