@@ -6,4 +6,7 @@ CREATE TABLE IF NOT EXISTS expenses (
     tags TEXT[]
 );
 
-INSERT INTO expenses (id, title, amount, note, tags) VALUES (DEFAULT, 'Bob', 20, 'testing', ARRAY['foo', 'bar']);
+INSERT INTO expenses (id, title, amount, note, tags) 
+VALUES 
+    (DEFAULT, 'Bob', 20, 'testing', ARRAY['foo', 'bar']),
+    (DEFAULT, 'John', 50, 'testing', ARRAY['snack', 'bar']);

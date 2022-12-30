@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"strconv"
 	"strings"
 	"testing"
 
@@ -37,7 +38,7 @@ func TestCreateExpenseHandler(t *testing.T) {
 	}
 	reqBody, _ := json.Marshal(expense)
 
-	req := httptest.NewRequest(http.MethodPost, "/expense/", bytes.NewBuffer(reqBody))
+	req := httptest.NewRequest(http.MethodPost, "/expenses/", bytes.NewBuffer(reqBody))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	res := httptest.NewRecorder()
 	e := echo.New()
@@ -63,11 +64,11 @@ func TestCreateExpenseHandler(t *testing.T) {
 }
 
 func TestGetExpenseHandler(t *testing.T) {
-	req := httptest.NewRequest(http.MethodGet, "/expense/1", strings.NewReader(""))
+	req := httptest.NewRequest(http.MethodGet, "/expenses/1", strings.NewReader(""))
 	res := httptest.NewRecorder()
 	e := echo.New()
 	c := e.NewContext(req, res)
-	c.SetPath("/expense/:id")
+	c.SetPath("/expenses/:id")
 	c.SetParamNames("id")
 	c.SetParamValues("1")
 
@@ -93,6 +94,49 @@ func TestGetExpenseHandler(t *testing.T) {
 	expected, _ := json.Marshal(expense)
 
 	err := handler.getExpenseHandler(c)
+
+	if assert.NoError(t, err) {
+		assert.NoError(t, mock.ExpectationsWereMet())
+		assert.Equal(t, http.StatusOK, res.Code)
+		assert.Equal(t, string(expected), strings.TrimSpace(res.Body.String()))
+	}
+}
+
+func TestUpdateExpenseHandler(t *testing.T) {
+	expense := database.Expense{
+		Title:  "Malee",
+		Amount: 100,
+		Note:   "just testing",
+		Tags:   []string{"banana", "orange"},
+	}
+	reqBody, _ := json.Marshal(expense)
+
+	req := httptest.NewRequest(http.MethodPut, "/expenses/2", bytes.NewBuffer(reqBody))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	res := httptest.NewRecorder()
+	e := echo.New()
+	c := e.NewContext(req, res)
+	c.SetPath("/expenses/:id")
+	c.SetParamNames("id")
+	c.SetParamValues("2")
+	id, _ := strconv.Atoi(c.Param("id"))
+	expense.ID = id
+
+	db, mock := setupDB(t)
+	defer db.Close()
+	handler := New(db)
+
+	sqlmock.NewRows([]string{"id", "title", "amount", "note", "tags"}).
+		AddRow(1, "Bob", 20, "testing", pq.Array([]string{"foo", "bar"})).
+		AddRow(2, "John", 50, "testing", pq.Array([]string{"snack", "bar"}))
+
+	mock.ExpectExec("UPDATE expenses").
+		WithArgs(expense.ID, expense.Title, expense.Amount, expense.Note, pq.Array(expense.Tags)).
+		WillReturnResult(sqlmock.NewResult(0, 1))
+
+	expected, _ := json.Marshal(expense)
+
+	err := handler.updateExpenseHandler(c)
 
 	if assert.NoError(t, err) {
 		assert.NoError(t, mock.ExpectationsWereMet())

@@ -36,8 +36,9 @@ func TestCreateExpense(t *testing.T) {
 		WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(1))
 
 	err := expense.Create(db)
-	assert.NoError(t, err)
-	assert.NoError(t, mock.ExpectationsWereMet())
+	if assert.NoError(t, err) {
+		assert.NoError(t, mock.ExpectationsWereMet())
+	}
 }
 
 func TestGetExpense(t *testing.T) {
@@ -55,6 +56,28 @@ func TestGetExpense(t *testing.T) {
 	expense := Expense{ID: 1}
 	err := expense.Get(db)
 
-	assert.NoError(t, err)
-	assert.NoError(t, mock.ExpectationsWereMet())
+	if assert.NoError(t, err) {
+		assert.NoError(t, mock.ExpectationsWereMet())
+	}
+}
+
+func TestUpdateExpense(t *testing.T) {
+	db, mock := setup(t)
+	defer db.Close()
+
+	expense := Expense{
+		Title:  "john",
+		Amount: 20,
+		Note:   "test",
+		Tags:   []string{"foo", "bar"},
+	}
+
+	mock.ExpectExec("UPDATE expenses").
+		WithArgs(expense.ID, expense.Title, expense.Amount, expense.Note, pq.Array(expense.Tags)).
+		WillReturnResult(sqlmock.NewResult(0, 1))
+
+	err := expense.Update(db)
+	if assert.NoError(t, err) {
+		assert.NoError(t, mock.ExpectationsWereMet())
+	}
 }
