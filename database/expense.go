@@ -37,7 +37,7 @@ func (e *Expense) Update(db *sql.DB) error {
 	_, err := db.Exec(`
 		UPDATE expenses
 		SET title = $2, amount = $3, note = $4, tags = $5 
-		WHERE $1`,
+		WHERE id = $1`,
 		e.ID, e.Title, e.Amount, e.Note, pq.Array(e.Tags))
 	return err
 }

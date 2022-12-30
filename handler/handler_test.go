@@ -111,14 +111,14 @@ func TestUpdateExpenseHandler(t *testing.T) {
 	}
 	reqBody, _ := json.Marshal(expense)
 
-	req := httptest.NewRequest(http.MethodPut, "/expense/1", bytes.NewBuffer(reqBody))
+	req := httptest.NewRequest(http.MethodPut, "/expense/2", bytes.NewBuffer(reqBody))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	res := httptest.NewRecorder()
 	e := echo.New()
 	c := e.NewContext(req, res)
 	c.SetPath("/expense/:id")
 	c.SetParamNames("id")
-	c.SetParamValues("1")
+	c.SetParamValues("2")
 	id, _ := strconv.Atoi(c.Param("id"))
 	expense.ID = id
 
@@ -127,7 +127,8 @@ func TestUpdateExpenseHandler(t *testing.T) {
 	handler := New(db)
 
 	sqlmock.NewRows([]string{"id", "title", "amount", "note", "tags"}).
-		AddRow(1, "Bob", 20, "testing", pq.Array([]string{"foo", "bar"}))
+		AddRow(1, "Bob", 20, "testing", pq.Array([]string{"foo", "bar"})).
+		AddRow(2, "John", 50, "testing", pq.Array([]string{"snack", "bar"}))
 
 	mock.ExpectExec("UPDATE expenses").
 		WithArgs(expense.ID, expense.Title, expense.Amount, expense.Note, pq.Array(expense.Tags)).

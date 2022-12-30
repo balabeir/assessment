@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"strconv"
 	"strings"
 	"testing"
 
@@ -66,7 +67,6 @@ func TestITGetExpense(t *testing.T) {
 	defer db.Close()
 
 	req := httptest.NewRequest(http.MethodGet, "/expense/1", strings.NewReader(""))
-	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	res := httptest.NewRecorder()
 	e := echo.New()
 	c := e.NewContext(req, res)
@@ -87,6 +87,44 @@ func TestITGetExpense(t *testing.T) {
 	assert.NoError(t, err)
 	var got database.Expense
 	err = json.NewDecoder(res.Body).Decode(&got)
+
+	if assert.NoError(t, err) {
+		assert.Equal(t, http.StatusOK, res.Code)
+		assert.Equal(t, expected.ID, got.ID)
+		assert.Equal(t, expected.Title, got.Title)
+		assert.Equal(t, expected.Amount, got.Amount)
+		assert.Equal(t, expected.Note, got.Note)
+		assert.Equal(t, expected.Tags, got.Tags)
+	}
+}
+
+func TestITUpdateExpense(t *testing.T) {
+	db := setupDBIntegration(t)
+	defer db.Close()
+
+	expected := database.Expense{
+		Title:  "Malee",
+		Amount: 100,
+		Note:   "just testing",
+		Tags:   []string{"banana", "orange"},
+	}
+	reqBody, _ := json.Marshal(expected)
+
+	req := httptest.NewRequest(http.MethodPut, "/expense/2", bytes.NewBuffer(reqBody))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	res := httptest.NewRecorder()
+	e := echo.New()
+	c := e.NewContext(req, res)
+	c.SetPath("/expense/:id")
+	c.SetParamNames("id")
+	c.SetParamValues("2")
+	handler := New(db)
+	id, _ := strconv.Atoi(c.Param("id"))
+	expected.ID = id
+
+	err := handler.updateExpenseHandler(c)
+	var got database.Expense
+	json.NewDecoder(res.Body).Decode(&got)
 
 	if assert.NoError(t, err) {
 		assert.Equal(t, http.StatusOK, res.Code)
