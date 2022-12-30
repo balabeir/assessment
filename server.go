@@ -11,9 +11,8 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/balabeir/assessment/database"
 	"github.com/balabeir/assessment/handler"
-	"github.com/balabeir/assessment/store"
-	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	_ "github.com/lib/pq"
 )
@@ -24,7 +23,7 @@ func main() {
 		log.Fatal("Connect database failed:", err)
 	}
 
-	store.Initial(conn)
+	database.Initial(conn)
 	e := handler.NewServer(conn)
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
@@ -36,17 +35,13 @@ func main() {
 		}
 	}()
 
-	shutdown(e)
-}
-
-func shutdown(e *echo.Echo) {
 	shutdown := make(chan os.Signal, 1)
 	signal.Notify(shutdown, os.Interrupt, syscall.SIGTERM)
 	<-shutdown
 	fmt.Println("server shutting down...")
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
 	if err := e.Shutdown(ctx); err != nil {
 		e.Logger.Fatal(err)
 	}
+	defer cancel()
 }
