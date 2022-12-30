@@ -55,7 +55,8 @@ func TestCreateExpenseHandler(t *testing.T) {
 
 	err := handler.createExpenseHandler(c)
 
-	if assert.NoError(t, err) && assert.NoError(t, mock.ExpectationsWereMet()) {
+	if assert.NoError(t, err) {
+		assert.NoError(t, mock.ExpectationsWereMet())
 		assert.Equal(t, http.StatusCreated, res.Code)
 		assert.Equal(t, string(expected), strings.TrimSpace(res.Body.String()))
 	}
@@ -93,7 +94,8 @@ func TestGetExpenseHandler(t *testing.T) {
 
 	err := handler.getExpenseHandler(c)
 
-	if assert.NoError(t, err) && assert.NoError(t, mock.ExpectationsWereMet()) {
+	if assert.NoError(t, err) {
+		assert.NoError(t, mock.ExpectationsWereMet())
 		assert.Equal(t, http.StatusOK, res.Code)
 		assert.Equal(t, string(expected), strings.TrimSpace(res.Body.String()))
 	}

@@ -18,7 +18,8 @@ import (
 )
 
 func TestITCreateExpense(t *testing.T) {
-	db, _ := sql.Open("postgres", "postgresql://test:test@db/it-db?sslmode=disable")
+	db, err := sql.Open("postgres", "postgresql://test:test@db/it-db?sslmode=disable")
+	assert.NoError(t, err)
 
 	expense := database.Expense{
 		ID:     1,
@@ -29,17 +30,20 @@ func TestITCreateExpense(t *testing.T) {
 	}
 	reqBody, _ := json.Marshal(expense)
 
-	handler := New(db)
+	req := httptest.NewRequest(http.MethodPost, "/expense/", bytes.NewBuffer(reqBody))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	res := httptest.NewRecorder()
 	e := echo.New()
-	e.POST("/expense", handler.createExpenseHandler)
+	c := e.NewContext(req, res)
+	handler := New(db)
 
-	srv := httptest.NewServer(e)
-	resp, _ := http.Post(srv.URL+"/expense", echo.MIMEApplicationJSON, bytes.NewBuffer(reqBody))
-
+	err = handler.createExpenseHandler(c)
+	assert.NoError(t, err)
 	var got database.Expense
-	json.NewDecoder(resp.Body).Decode(&got)
+	err = json.NewDecoder(res.Body).Decode(&got)
 
-	if assert.Equal(t, http.StatusCreated, resp.StatusCode) {
+	if assert.NoError(t, err) {
+		assert.Equal(t, http.StatusCreated, res.Code)
 		assert.NotEqual(t, 0, got.ID)
 		assert.Equal(t, expense.Title, got.Title)
 		assert.Equal(t, expense.Amount, got.Amount)
