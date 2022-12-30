@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/balabeir/assessment/store"
+	"github.com/balabeir/assessment/database"
 	"github.com/labstack/echo/v4"
 	_ "github.com/lib/pq"
 )
@@ -30,7 +30,7 @@ func NewServer(db *sql.DB) *echo.Echo {
 }
 
 func (h *Handler) createExpenseHandler(c echo.Context) error {
-	expense := store.Expense{}
+	expense := database.Expense{}
 	err := c.Bind(&expense)
 	if err != nil {
 		c.Echo().Logger.Error(err)
@@ -59,7 +59,7 @@ func (h *Handler) getExpenseHandler(c echo.Context) error {
 		})
 	}
 
-	expense := store.Expense{ID: id}
+	expense := database.Expense{ID: id}
 	err = expense.Get(h.db)
 	if err == sql.ErrNoRows {
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{

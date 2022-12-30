@@ -11,8 +11,8 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/balabeir/assessment/database"
 	"github.com/balabeir/assessment/handler"
-	"github.com/balabeir/assessment/store"
 	"github.com/labstack/echo/v4/middleware"
 	_ "github.com/lib/pq"
 )
@@ -23,7 +23,7 @@ func main() {
 		log.Fatal("Connect database failed:", err)
 	}
 
-	store.Initial(conn)
+	database.Initial(conn)
 	e := handler.NewServer(conn)
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())

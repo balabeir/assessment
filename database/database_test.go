@@ -1,7 +1,7 @@
 //go:build unit
 // +build unit
 
-package store
+package database
 
 import (
 	"database/sql"
@@ -37,6 +37,7 @@ func TestCreateExpense(t *testing.T) {
 
 	err := expense.Create(db)
 	assert.NoError(t, err)
+	assert.NoError(t, mock.ExpectationsWereMet())
 }
 
 func TestGetExpense(t *testing.T) {
@@ -55,4 +56,5 @@ func TestGetExpense(t *testing.T) {
 	err := expense.Get(db)
 
 	assert.NoError(t, err)
+	assert.NoError(t, mock.ExpectationsWereMet())
 }

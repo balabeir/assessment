@@ -11,7 +11,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/balabeir/assessment/store"
+	"github.com/balabeir/assessment/database"
 	"github.com/labstack/echo/v4"
 	_ "github.com/lib/pq"
 	"github.com/stretchr/testify/assert"
@@ -20,7 +20,7 @@ import (
 func TestITCreateExpense(t *testing.T) {
 	db, _ := sql.Open("postgres", "postgresql://test:test@db/it-db?sslmode=disable")
 
-	expense := store.Expense{
+	expense := database.Expense{
 		ID:     1,
 		Title:  "Bob",
 		Amount: 20,
@@ -36,7 +36,7 @@ func TestITCreateExpense(t *testing.T) {
 	srv := httptest.NewServer(e)
 	resp, _ := http.Post(srv.URL+"/expense", echo.MIMEApplicationJSON, bytes.NewBuffer(reqBody))
 
-	var got store.Expense
+	var got database.Expense
 	json.NewDecoder(resp.Body).Decode(&got)
 
 	if assert.Equal(t, http.StatusCreated, resp.StatusCode) {

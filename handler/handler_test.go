@@ -13,7 +13,7 @@ import (
 	"testing"
 
 	"github.com/DATA-DOG/go-sqlmock"
-	"github.com/balabeir/assessment/store"
+	"github.com/balabeir/assessment/database"
 	"github.com/labstack/echo/v4"
 	"github.com/lib/pq"
 	"github.com/stretchr/testify/assert"
@@ -28,7 +28,7 @@ func setupDB(t *testing.T) (*sql.DB, sqlmock.Sqlmock) {
 }
 
 func TestCreateExpenseHandler(t *testing.T) {
-	expense := store.Expense{
+	expense := database.Expense{
 		ID:     1,
 		Title:  "Bob",
 		Amount: 20,
@@ -55,7 +55,7 @@ func TestCreateExpenseHandler(t *testing.T) {
 
 	err := handler.createExpenseHandler(c)
 
-	if assert.NoError(t, err) {
+	if assert.NoError(t, err) && assert.NoError(t, mock.ExpectationsWereMet()) {
 		assert.Equal(t, http.StatusCreated, res.Code)
 		assert.Equal(t, string(expected), strings.TrimSpace(res.Body.String()))
 	}
@@ -82,7 +82,7 @@ func TestGetExpenseHandler(t *testing.T) {
 		WithArgs(1).
 		WillReturnRows(mockRows)
 
-	expense := store.Expense{
+	expense := database.Expense{
 		ID:     1,
 		Title:  "Bob",
 		Amount: 20,
@@ -93,22 +93,8 @@ func TestGetExpenseHandler(t *testing.T) {
 
 	err := handler.getExpenseHandler(c)
 
-	if assert.NoError(t, err) {
+	if assert.NoError(t, err) && assert.NoError(t, mock.ExpectationsWereMet()) {
 		assert.Equal(t, http.StatusOK, res.Code)
 		assert.Equal(t, string(expected), strings.TrimSpace(res.Body.String()))
 	}
-
-	// db := setup(t)
-	// defer db.Close()
-	// handler := NewServer(db)
-	// srv := httptest.NewServer(handler)
-
-	// resp, _ := http.Get(srv.URL + "/expense/1")
-
-	// var got store.Expense
-	// json.NewDecoder(resp.Body).Decode(&got)
-
-	// assert := assert.New(t)
-	// assert.Equal(http.StatusOK, resp.StatusCode)
-	// assert.Equal(1, got.ID)
 }
