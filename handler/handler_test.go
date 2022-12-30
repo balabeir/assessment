@@ -140,3 +140,29 @@ func TestUpdateExpenseHandler(t *testing.T) {
 		assert.Equal(t, string(expected), strings.TrimSpace(res.Body.String()))
 	}
 }
+
+func TestGetExpenseListsHandler(t *testing.T) {
+	req := httptest.NewRequest(http.MethodGet, "/expenses", strings.NewReader(""))
+	res := httptest.NewRecorder()
+	e := echo.New()
+	c := e.NewContext(req, res)
+
+	db, mock := setupDB(t)
+	defer db.Close()
+	handler := New(db)
+
+	mockRows := sqlmock.NewRows([]string{"id", "title", "amount", "note", "tags"}).
+		AddRow(1, "Bob", 20, "testing", pq.Array([]string{"foo", "bar"})).
+		AddRow(2, "John", 50, "testing", pq.Array([]string{"snack", "bar"}))
+
+	mock.ExpectPrepare("SELECT id, title, amount, note, tags FROM expenses").
+		ExpectQuery().
+		WillReturnRows(mockRows)
+
+	err := handler.getExpenseListsHandler(c)
+
+	if assert.NoError(t, err) {
+		assert.NoError(t, mock.ExpectationsWereMet())
+		assert.Equal(t, http.StatusOK, res.Code)
+	}
+}

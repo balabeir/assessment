@@ -46,7 +46,7 @@ func TestGetExpense(t *testing.T) {
 	defer db.Close()
 
 	mockRows := sqlmock.NewRows([]string{"id", "title", "amount", "note", "tags"}).
-		AddRow(1, "one", 10, "test1", pq.Array([]string{"foo", "bar"}))
+		AddRow(1, "Bob", 20, "testing", pq.Array([]string{"foo", "bar"}))
 
 	mock.ExpectPrepare("SELECT id, title, amount, note, tags FROM expenses").
 		ExpectQuery().
@@ -87,8 +87,8 @@ func TestListExpenses(t *testing.T) {
 	defer db.Close()
 
 	mockRows := sqlmock.NewRows([]string{"id", "title", "amount", "note", "tags"}).
-		AddRow(1, "one", 10, "test1", pq.Array([]string{"foo", "bar"})).
-		AddRow(2, "two", 10, "test2", pq.Array([]string{"foo", "bar"}))
+		AddRow(1, "Bob", 20, "testing", pq.Array([]string{"foo", "bar"})).
+		AddRow(2, "John", 50, "testing", pq.Array([]string{"snack", "bar"}))
 
 	mock.ExpectPrepare("SELECT id, title, amount, note, tags FROM expenses").
 		ExpectQuery().
