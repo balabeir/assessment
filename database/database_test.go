@@ -81,3 +81,22 @@ func TestUpdateExpense(t *testing.T) {
 		assert.NoError(t, mock.ExpectationsWereMet())
 	}
 }
+
+func TestListExpenses(t *testing.T) {
+	db, mock := setup(t)
+	defer db.Close()
+
+	mockRows := sqlmock.NewRows([]string{"id", "title", "amount", "note", "tags"}).
+		AddRow(1, "one", 10, "test1", pq.Array([]string{"foo", "bar"})).
+		AddRow(2, "two", 10, "test2", pq.Array([]string{"foo", "bar"}))
+
+	mock.ExpectPrepare("SELECT id, title, amount, note, tags FROM expenses").
+		ExpectQuery().
+		WillReturnRows(mockRows)
+
+	_, err := GetExpenseLists(db)
+
+	if assert.NoError(t, err) {
+		assert.NoError(t, mock.ExpectationsWereMet())
+	}
+}

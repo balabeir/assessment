@@ -126,10 +126,6 @@ func TestUpdateExpenseHandler(t *testing.T) {
 	defer db.Close()
 	handler := New(db)
 
-	sqlmock.NewRows([]string{"id", "title", "amount", "note", "tags"}).
-		AddRow(1, "Bob", 20, "testing", pq.Array([]string{"foo", "bar"})).
-		AddRow(2, "John", 50, "testing", pq.Array([]string{"snack", "bar"}))
-
 	mock.ExpectExec("UPDATE expenses").
 		WithArgs(expense.ID, expense.Title, expense.Amount, expense.Note, pq.Array(expense.Tags)).
 		WillReturnResult(sqlmock.NewResult(0, 1))

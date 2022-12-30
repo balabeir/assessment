@@ -41,3 +41,26 @@ func (e *Expense) Update(db *sql.DB) error {
 		e.ID, e.Title, e.Amount, e.Note, pq.Array(e.Tags))
 	return err
 }
+
+func GetExpenseLists(db *sql.DB) ([]Expense, error) {
+	stm, err := db.Prepare("SELECT id, title, amount, note, tags FROM expenses")
+	if err != nil {
+		return []Expense{}, err
+	}
+	rows, err := stm.Query()
+	if err != nil {
+		return []Expense{}, err
+	}
+	defer rows.Close()
+
+	expenses := []Expense{}
+	for rows.Next() {
+		e := Expense{}
+		if err := rows.Scan(&e.ID, &e.Title, &e.Amount, &e.Note, pq.Array(&e.Tags)); err != nil {
+			return []Expense{}, err
+		}
+		expenses = append(expenses, e)
+	}
+
+	return expenses, nil
+}
