@@ -17,8 +17,8 @@ type Expense struct {
 
 func (e *Expense) Create(db *sql.DB) error {
 	row := db.QueryRow(`
-		INSERT INTO expenses (title, amount, note, tags)
-		VALUES ($1, $2, $3, $4) RETURNING id`,
+		INSERT INTO expenses (id, title, amount, note, tags)
+		VALUES (DEFAULT, $1, $2, $3, $4) RETURNING id`,
 		e.Title, e.Amount, e.Note, pq.Array(e.Tags))
 	err := row.Scan(&e.ID)
 	return err

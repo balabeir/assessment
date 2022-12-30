@@ -22,6 +22,6 @@ services:
       POSTGRES_DB: it-db
     restart: on-failure
     volumes:
-      - ./database/migrations:/docker-entrypoint-initdb.d/
+      - ./database/migrations/:/docker-entrypoint-initdb.d/
     networks:
       - integration-test

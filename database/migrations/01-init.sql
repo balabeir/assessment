@@ -5,3 +5,5 @@ CREATE TABLE IF NOT EXISTS expenses (
     note TEXT,
     tags TEXT[]
 );
+
+INSERT INTO expenses (id, title, amount, note, tags) VALUES (DEFAULT, 'Bob', 20, 'testing', ARRAY['foo', 'bar']);
