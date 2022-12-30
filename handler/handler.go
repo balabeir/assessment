@@ -26,9 +26,9 @@ func NewServer(db *sql.DB) *echo.Echo {
 	handler := New(db)
 	e := echo.New()
 
-	e.POST("/expense", handler.createExpenseHandler)
-	e.GET("/expense/:id", handler.getExpenseHandler)
-	e.PUT("/expense/:id", handler.updateExpenseHandler)
+	e.POST("/expenses", handler.createExpenseHandler)
+	e.GET("/expenses/:id", handler.getExpenseHandler)
+	e.PUT("/expenses/:id", handler.updateExpenseHandler)
 
 	return e
 }

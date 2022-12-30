@@ -40,7 +40,7 @@ func TestITCreateExpense(t *testing.T) {
 	}
 	reqBody, _ := json.Marshal(expense)
 
-	req := httptest.NewRequest(http.MethodPost, "/expense", bytes.NewBuffer(reqBody))
+	req := httptest.NewRequest(http.MethodPost, "/expenses", bytes.NewBuffer(reqBody))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	res := httptest.NewRecorder()
 	e := echo.New()
@@ -66,11 +66,11 @@ func TestITGetExpense(t *testing.T) {
 	db := setupDBIntegration(t)
 	defer db.Close()
 
-	req := httptest.NewRequest(http.MethodGet, "/expense/1", strings.NewReader(""))
+	req := httptest.NewRequest(http.MethodGet, "/expenses/1", strings.NewReader(""))
 	res := httptest.NewRecorder()
 	e := echo.New()
 	c := e.NewContext(req, res)
-	c.SetPath("/expense/:id")
+	c.SetPath("/expenses/:id")
 	c.SetParamNames("id")
 	c.SetParamValues("1")
 	handler := New(db)
@@ -110,12 +110,12 @@ func TestITUpdateExpense(t *testing.T) {
 	}
 	reqBody, _ := json.Marshal(expected)
 
-	req := httptest.NewRequest(http.MethodPut, "/expense/2", bytes.NewBuffer(reqBody))
+	req := httptest.NewRequest(http.MethodPut, "/expenses/2", bytes.NewBuffer(reqBody))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	res := httptest.NewRecorder()
 	e := echo.New()
 	c := e.NewContext(req, res)
-	c.SetPath("/expense/:id")
+	c.SetPath("/expenses/:id")
 	c.SetParamNames("id")
 	c.SetParamValues("2")
 	handler := New(db)
