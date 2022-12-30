@@ -26,6 +26,7 @@ func NewServer(db *sql.DB) *echo.Echo {
 	handler := New(db)
 	e := echo.New()
 
+	e.GET("/expenses", handler.getExpenseListsHandler)
 	e.POST("/expenses", handler.createExpenseHandler)
 	e.GET("/expenses/:id", handler.getExpenseHandler)
 	e.PUT("/expenses/:id", handler.updateExpenseHandler)
@@ -97,4 +98,14 @@ func (h *Handler) updateExpenseHandler(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, expense)
+}
+
+func (h *Handler) getExpenseListsHandler(c echo.Context) error {
+	expenses, err := database.GetExpenseLists(h.db)
+	if err != nil {
+		c.Echo().Logger.Error(err)
+		return c.JSON(http.StatusBadRequest, Err{Message: "internal server error"})
+	}
+
+	return c.JSON(http.StatusOK, expenses)
 }

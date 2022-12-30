@@ -48,9 +48,8 @@ func TestITCreateExpense(t *testing.T) {
 	handler := New(db)
 
 	err := handler.createExpenseHandler(c)
-	assert.NoError(t, err)
 	var got database.Expense
-	err = json.NewDecoder(res.Body).Decode(&got)
+	json.NewDecoder(res.Body).Decode(&got)
 
 	if assert.NoError(t, err) {
 		assert.Equal(t, http.StatusCreated, res.Code)
@@ -84,9 +83,8 @@ func TestITGetExpense(t *testing.T) {
 	}
 
 	err := handler.getExpenseHandler(c)
-	assert.NoError(t, err)
 	var got database.Expense
-	err = json.NewDecoder(res.Body).Decode(&got)
+	json.NewDecoder(res.Body).Decode(&got)
 
 	if assert.NoError(t, err) {
 		assert.Equal(t, http.StatusOK, res.Code)
@@ -133,5 +131,25 @@ func TestITUpdateExpense(t *testing.T) {
 		assert.Equal(t, expected.Amount, got.Amount)
 		assert.Equal(t, expected.Note, got.Note)
 		assert.Equal(t, expected.Tags, got.Tags)
+	}
+}
+
+func TestITGetExpenseLists(t *testing.T) {
+	db := setupDBIntegration(t)
+	defer db.Close()
+
+	req := httptest.NewRequest(http.MethodGet, "/expenses", strings.NewReader(""))
+	res := httptest.NewRecorder()
+	e := echo.New()
+	c := e.NewContext(req, res)
+	handler := New(db)
+
+	err := handler.getExpenseListsHandler(c)
+	var got []database.Expense
+	json.NewDecoder(res.Body).Decode(&got)
+
+	if assert.NoError(t, err) {
+		assert.Equal(t, http.StatusOK, res.Code)
+		assert.Less(t, 0, len(got))
 	}
 }
