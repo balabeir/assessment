@@ -14,6 +14,18 @@ type Err struct {
 	Message string `json:"message"`
 }
 
+func verifyHeader(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		header := map[string]interface{}{}
+		binder := &echo.DefaultBinder{}
+		binder.BindHeaders(c, &header)
+		if header["Authorization"] != "November 10, 2009" {
+			return c.JSON(http.StatusUnauthorized, Err{Message: "Unauthorized"})
+		}
+		return next(c)
+	}
+}
+
 type Handler struct {
 	db *sql.DB
 }
@@ -25,6 +37,8 @@ func New(db *sql.DB) *Handler {
 func NewServer(db *sql.DB) *echo.Echo {
 	handler := New(db)
 	e := echo.New()
+
+	e.Use(verifyHeader)
 
 	e.GET("/expenses", handler.getExpenseListsHandler)
 	e.POST("/expenses", handler.createExpenseHandler)
