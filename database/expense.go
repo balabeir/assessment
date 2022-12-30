@@ -4,7 +4,6 @@ import (
 	"database/sql"
 
 	"github.com/lib/pq"
-	_ "github.com/lib/pq"
 )
 
 type Expense struct {
@@ -32,4 +31,13 @@ func (e *Expense) Get(db *sql.DB) error {
 	row := stm.QueryRow(e.ID)
 
 	return row.Scan(&e.ID, &e.Title, &e.Amount, &e.Note, pq.Array(&e.Tags))
+}
+
+func (e *Expense) Update(db *sql.DB) error {
+	_, err := db.Exec(`
+		UPDATE expenses
+		SET title = $2, amount = $3, note = $4, tags = $5 
+		WHERE $1`,
+		e.ID, e.Title, e.Amount, e.Note, pq.Array(e.Tags))
+	return err
 }
