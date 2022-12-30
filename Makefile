@@ -4,3 +4,6 @@ test:
 test-it:
 	docker-compose -f docker-compose.test.yml down
 	docker-compose -f docker-compose.test.yml up --build --abort-on-container-exit --exit-code-from it_tests
+
+build:
+	docker build -t balabeir/assessment:latest . 
